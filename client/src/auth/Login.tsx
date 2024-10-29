@@ -1,0 +1,118 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { LoginInputFields, UserLoginSchema } from "@/schema/userSchema";
+import { useUserStore } from "@/store/useUserStore";
+import { Separator } from "@radix-ui/react-separator";
+import { Loader2, Lock, Mail } from "lucide-react";
+import { ChangeEvent, FormEvent, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+//zod provide this functionality
+// interface LoginInputFields {
+//   email: string;
+//   password: string;
+// }
+
+const Login = () => {
+  const [errors, setErrors] = useState<Partial<LoginInputFields>>({});
+  const { loading, login } = useUserStore();
+  const navigate = useNavigate();
+  const [input, setInput] = useState<LoginInputFields>({
+    email: "",
+    password: "",
+  });
+  const HandleChangeEvent = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setInput({ ...input, [name]: value });
+  };
+  const HandleLoginSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const result = UserLoginSchema.safeParse(input);
+    if (!result.success) {
+      const fieldErrors = result.error.formErrors.fieldErrors;
+      setErrors(fieldErrors as Partial<LoginInputFields>);
+      return;
+    }
+    try {
+      login(input);
+      navigate("/");
+    } catch (error) {}
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <form
+        onSubmit={HandleLoginSubmit}
+        className="md:p-8 w-full max-w-md md:border border-gray-200 rounded-lg mx-4"
+      >
+        <div className="mb-4">
+          <h1 className="font-bold text-2xl">Hello There</h1>
+        </div>
+        <div className="mb-4">
+          <div className="relative">
+            <Input
+              type="email"
+              name="email"
+              placeholder="Email"
+              className="pl-10 focus-visible:ring-1"
+              value={input.email}
+              onChange={HandleChangeEvent}
+            ></Input>
+            <Mail className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none" />
+            {errors && (
+              <span className="text-xs text-red-500">{errors.email}</span>
+            )}
+          </div>
+        </div>
+        <div className="mb-4">
+          <div className="relative">
+            <Input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="pl-10 focus-visible:ring-1"
+              value={input.password}
+              onChange={HandleChangeEvent}
+            ></Input>
+            <Lock className="absolute inset-y-2 left-2 text-gray-500 pointer-events-none" />
+            {errors && (
+              <span className="text-xs text-red-500">{errors.password}</span>
+            )}
+          </div>
+        </div>
+        <div className="mb-10">
+          {loading ? (
+            <Button
+              disabled
+              type="submit"
+              className="w-full bg-orange hover:bg-hoverGreen"
+            >
+              <Loader2 className="mr-1   h-4 w-4 animate-spin" /> Please wait
+            </Button>
+          ) : (
+            <Button className="w-full bg-orange hover:bg-hoverGreen">
+              Login
+            </Button>
+          )}
+          <div className=" mt-4">
+            <Link
+              to="/forgot-password"
+              className="text-blue-400 hover:text-blue-600  hover:underline"
+            >
+              Forgot password
+            </Link>
+          </div>
+        </div>
+        <Separator className="border-b-2" />
+        <p className="mt-2">
+          Dont' have an account?{" "}
+          <Link to="/signup" className="text-blue-500">
+            Signup
+          </Link>
+        </p>
+      </form>
+    </div>
+  );
+};
+
+export default Login;
