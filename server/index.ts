@@ -20,7 +20,7 @@ app.use(cookieParser());
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: "https://hello-food-app.onrender.com",
   credentials: true,
 };
 app.use(cors(corsOptions));
